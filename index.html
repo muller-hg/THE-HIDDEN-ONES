@@ -2,116 +2,145 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ANIMUS | ACCESS POINT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA SEQUENCE VERIFICATION</title>
     <style>
-        body { 
-            background-color: #e0e0e0; 
-            color: #333; 
-            font-family: "Segoe UI", Tahoma, sans-serif; 
-            display: flex; align-items: center; justify-content: center; 
-            height: 100vh; margin: 0; overflow: hidden;
+        body, html {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
-        .glitch-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.3); z-index: 10; pointer-events: none; display: none;
+
+        /* Full-screen Desync Overlay */
+        #desync-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(139, 0, 0, 0.95);
+            color: white;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(2rem, 10vw, 5rem);
+            font-weight: 900;
+            letter-spacing: 15px;
+            z-index: 9999;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(0,0,0,0.7);
         }
-        #login-box {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px; border-left: 5px solid #000;
-            box-shadow: 20px 20px 0px #bcbcbc; width: 450px; z-index: 5;
+
+        .active-desync {
+            display: flex !important;
+            animation: glitcheffect 0.1s infinite;
         }
-        h1 { font-weight: 300; letter-spacing: 8px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+
+        @keyframes glitcheffect {
+            0% { transform: skew(2deg); opacity: 1; }
+            20% { transform: skew(-3deg); opacity: 0.8; }
+            40% { transform: skew(5deg); }
+            60% { transform: skew(-1deg); opacity: 1; }
+            80% { transform: skew(4deg); }
+            100% { transform: skew(0deg); }
+        }
+
+        .portal-box {
+            position: relative;
+            text-align: center;
+            padding: 60px;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid #222;
+            width: 450px;
+            z-index: 10;
+        }
+
+        .insignia {
+            width: 80px; height: 110px;
+            margin: 0 auto 40px;
+            background-color: #fff;
+            clip-path: polygon(50% 0%, 100% 100%, 85% 100%, 50% 35%, 15% 100%, 0% 100%);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        h1 {
+            font-size: 0.9rem;
+            letter-spacing: 6px;
+            color: #666;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
         input {
-            width: 100%; padding: 10px 0; background: transparent; border: none;
-            border-bottom: 2px solid #000; font-size: 16px; outline: none;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #333;
+            color: #fff;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            text-transform: lowercase;
         }
-        #message { margin-top: 20px; font-size: 12px; color: #d9534f; font-weight: bold; min-height: 20px;}
-        .hidden { display: none; }
-        .btn-access {
-            display:inline-block; margin-top:20px; padding:15px 30px; 
-            background:#000; color:#fff; text-decoration:none; 
-            font-weight: bold; letter-spacing: 2px; cursor: pointer; border: none;
+
+        input:focus { border-color: #fff; }
+
+        .status-text {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: #444;
+            letter-spacing: 2px;
         }
-        .btn-access:hover { background: #333; }
     </style>
 </head>
 <body>
 
-<div class="glitch-overlay" id="glitch"></div>
+<div id="desync-screen">DESYNCHRONIZED</div>
 
-<audio id="ambientLoop" loop>
-    <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/pause.wav" type="audio/wav">
-</audio>
-<audio id="deniedSound">
-    <source src="https://freesound.org/data/previews/415/415764_6090639-lq.mp3" type="audio/mp3">
-</audio>
-<audio id="grantedSound">
-    <source src="https://freesound.org/data/previews/263/263129_4232300-lq.mp3" type="audio/mp3">
-</audio>
-<audio id="bladeSound">
-    <source src="https://freesound.org/data/previews/568/568169_12723321-lq.mp3" type="audio/mp3">
-</audio>
-
-<div id="login-box">
-    <h1>ANIMUS</h1>
-    <div id="entry-ui">
-        <p style="font-size: 10px; color: #888; letter-spacing: 2px;">ENCRYPTION LAYER: 0.1.2</p>
-        <p style="font-size: 14px; color: #555;">Speak the words of the Creed to synchronize:</p>
-        <input type="text" id="passwordField" placeholder="Enter Maxim..." autofocus autocomplete="off">
-        <div id="message"></div>
-        <p style="font-size: 9px; color: #aaa; margin-top: 30px;">[ CLICK ANYWHERE TO INITIALIZE AUDIO ]</p>
-    </div>
-
-    <div id="secretContent" class="hidden" style="text-align: center;">
-        <h2 style="letter-spacing: 2px;">SYNCHRONIZED</h2>
-        <p style="font-style: italic; color: #666;">"Nothing is true, everything is permitted."</p>
-        <button class="btn-access" id="finalButton">LEAP OF FAITH</button>
-    </div>
+<div class="portal-box" id="main-box">
+    <div class="insignia"></div>
+    <h1>Genetic Memory Locked</h1>
+    
+    <input type="text" id="passInput" placeholder="Enter Credentials..." autocomplete="off">
+    
+    <div id="msg" class="status-text">WAITING FOR INPUT...</div>
 </div>
 
 <script>
-    const input = document.getElementById('passwordField');
-    const msg = document.getElementById('message');
-    const glitch = document.getElementById('glitch');
-    const ambient = document.getElementById('ambientLoop');
-    const denied = document.getElementById('deniedSound');
-    const granted = document.getElementById('grantedSound');
-    const blade = document.getElementById('bladeSound');
-    const finalBtn = document.getElementById('finalButton');
-    
-    const secretWord = "nothing is true everything is permitted";
-
-    // Start ambient sound on click
-    document.body.addEventListener('click', () => { ambient.play(); }, {once: true});
-
-    function triggerGlitch() {
-        glitch.style.display = 'block';
-        setTimeout(() => { glitch.style.display = 'none'; }, 150);
-    }
+    const input = document.getElementById('passInput');
+    const desyncScreen = document.getElementById('desync-screen');
+    const msg = document.getElementById('msg');
 
     input.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
-            if (input.value.trim().toLowerCase() === secretWord) {
-                granted.play();
-                triggerGlitch();
-                document.getElementById('entry-ui').classList.add('hidden');
-                document.getElementById('secretContent').classList.remove('hidden');
+            const val = input.value.toLowerCase().trim();
+            
+            // The Secret Phrase
+            if (val === "nothing is true everything is permitted") {
+                msg.innerHTML = "ACCESS GRANTED. REDIRECTING...";
+                msg.style.color = "#00ffcc";
+                setTimeout(() => {
+                    window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)";
+                }, 1500);
             } else {
-                denied.play();
-                triggerGlitch();
-                msg.innerText = "DESYNCHRONIZATION DETECTED";
-                input.value = "";
-                setTimeout(() => { msg.innerText = ""; }, 2000);
+                // Full Screen Failure
+                desyncScreen.classList.add('active-desync');
+                
+                setTimeout(() => {
+                    desyncScreen.classList.remove('active-desync');
+                    input.value = "";
+                    input.focus();
+                }, 1200);
             }
         }
-    });
-
-    finalBtn.addEventListener('click', function() {
-        blade.play();
-        triggerGlitch();
-        setTimeout(() => {
-            window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)
-        }, 800); // Small delay so they hear the blade before leaving
     });
 </script>
 
