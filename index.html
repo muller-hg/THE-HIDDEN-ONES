@@ -3,124 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNA SEQUENCE VERIFICATION | THE HIDDEN ONES</title>
+    <title>ANIMUS TERMINAL | THE HIDDEN ONES</title>
+    <link rel="icon" type="image/x-icon" href="https://www.google.com/s2/favicons?domain=assassinscreed.fandom.com">
     <style>
         body, html {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            background-color: #050505; color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100%; margin: 0; display: flex;
+            justify-content: center; align-items: center; overflow: hidden;
+            animation: backgroundPulse 12s infinite alternate;
         }
-
-        /* --- Full-screen Desync Overlay --- */
+        @keyframes backgroundPulse { 0% { background-color: #050505; } 100% { background-color: #0b1116; } }
+        .overlay-effect {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 5; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
         #desync-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(139, 0, 0, 0.95);
-            color: white;
-            display: none; /* Hidden by default */
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(2rem, 8vw, 5rem);
-            font-weight: 900;
-            letter-spacing: 15px;
-            z-index: 9999;
-            text-transform: uppercase;
-            text-shadow: 0 0 30px rgba(0,0,0,0.8);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(150, 0, 0, 0.98); color: white;
+            display: none; justify-content: center; align-items: center;
+            font-size: clamp(2rem, 8vw, 5rem); font-weight: 900;
+            letter-spacing: 15px; z-index: 9999; text-transform: uppercase;
         }
-
-        /* Animation for the Desync Glitch */
-        @keyframes glitcheffect {
-            0% { transform: skew(3deg); opacity: 1; }
-            20% { transform: skew(-3deg); opacity: 0.7; }
-            40% { transform: skew(6deg); }
-            60% { transform: skew(-2deg); opacity: 1; }
-            80% { transform: skew(5deg); }
-            100% { transform: skew(0deg); }
-        }
-
-        .active-desync {
-            display: flex !important;
-            animation: glitcheffect 0.1s infinite;
-        }
-
-        /* --- Main Portal Box --- */
+        .active-desync { display: flex !important; animation: glitcheffect 0.1s infinite; }
+        @keyframes glitcheffect { 0% { transform: translate(3px, 1px); } 50% { transform: translate(-3px, -1px); filter: blur(2px); } 100% { transform: translate(0); } }
         .portal-box {
-            position: relative;
-            text-align: center;
-            padding: 60px;
-            background: rgba(10, 10, 10, 0.95);
-            border: 1px solid #222;
-            width: 450px;
-            z-index: 10;
-            transition: all 0.3s ease;
+            position: relative; text-align: center; padding: 50px;
+            background: rgba(10, 10, 10, 0.85); border: 1px solid #333;
+            width: 400px; z-index: 50; box-shadow: 0 0 30px rgba(0,0,0,1);
+            backdrop-filter: blur(8px);
         }
-
-        /* The Assassin Insignia */
         .insignia {
-            width: 80px; height: 110px;
-            margin: 0 auto 40px;
-            background-color: #fff;
-            clip-path: polygon(50% 0%, 100% 100%, 85% 100%, 50% 35%, 15% 100%, 0% 100%);
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            width: 80px; height: 110px; margin: 0 auto 30px;
+            background-color: #ffffff; clip-path: polygon(50% 0%, 100% 100%, 85% 100%, 50% 35%, 15% 100%, 0% 100%);
+            animation: pulse-glow 4s infinite ease-in-out;
         }
-
-        h1 {
-            font-size: 0.9rem;
-            letter-spacing: 6px;
-            color: #666;
-            margin-bottom: 40px;
-            text-transform: uppercase;
-        }
-
-        /* --- Input Styling --- */
+        @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); transform: scale(1); } 50% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); transform: scale(1.03); } }
+        h1 { font-size: 0.8rem; letter-spacing: 5px; color: #888; margin-bottom: 30px; text-transform: uppercase; }
         input {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #333;
-            color: #fff;
-            width: 100%;
-            padding: 10px;
-            text-align: center;
-            font-size: 1.1rem;
-            outline: none;
-            transition: all 0.3s;
-            text-transform: lowercase;
+            background: #111; border: none; border-bottom: 2px solid #444;
+            color: #fff; width: 100%; padding: 12px; text-align: center;
+            font-size: 1rem; outline: none; transition: 0.3s;
         }
-
-        input:focus { 
-            border-color: #fff; 
-            letter-spacing: 1px;
-        }
-
-        .status-text {
-            margin-top: 20px;
-            font-size: 0.7rem;
-            color: #444;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
+        #loading-container { width: 100%; height: 4px; background: #222; margin-top: 30px; display: none; overflow: hidden; }
+        #loading-bar { width: 0%; height: 100%; background: #00ffcc; box-shadow: 0 0 15px #00ffcc; transition: width 3.5s linear; }
+        .status-text { margin-top: 20px; font-size: 0.7rem; color: #555; letter-spacing: 2px; }
     </style>
 </head>
-<body>
+<body onclick="initAudio()">
 
+    <div class="overlay-effect"></div>
     <div id="desync-screen">DESYNCHRONIZED</div>
 
-    <div class="portal-box" id="main-box">
+    <div class="portal-box">
         <div class="insignia"></div>
         <h1>Genetic Memory Locked</h1>
-        
-        <input type="text" id="passInput" placeholder="Enter Credentials..." autocomplete="off">
-        
+        <input type="text" id="passInput" placeholder="Click to Initialize Animus..." autocomplete="off">
+        <div id="loading-container"><div id="loading-bar"></div></div>
         <div id="msg" class="status-text">SYSTEM STANDBY...</div>
     </div>
 
@@ -128,32 +69,67 @@
         const input = document.getElementById('passInput');
         const desyncScreen = document.getElementById('desync-screen');
         const msg = document.getElementById('msg');
-        const box = document.getElementById('main-box');
+        const loadingContainer = document.getElementById('loading-container');
+        const loadingBar = document.getElementById('loading-bar');
+
+        // Audio Context (Synthesized sound)
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                input.placeholder = "Enter Credentials...";
+            }
+        }
+
+        function playSynthSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                // High Tech Chime
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } else {
+                // Low Glitch Buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(55, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
 
         input.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
+                initAudio(); // Backup init
                 const val = input.value.toLowerCase().trim();
                 
-                // --- SUCCESS PATH ---
                 if (val === "nothing is true everything is permitted") {
-                    msg.innerHTML = "ACCESS GRANTED. SYNCHRONIZING...";
+                    playSynthSound('success');
+                    input.style.display = "none";
+                    msg.innerHTML = "SYNCHRONIZING SEQUENCE...";
                     msg.style.color = "#00ffcc";
-                    input.style.borderColor = "#00ffcc";
-                    
-                    setTimeout(() => {
-                        window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)";
-                    }, 1500);
-
-                // --- FAILURE PATH ---
+                    loadingContainer.style.display = "block";
+                    setTimeout(() => { loadingBar.style.width = "100%"; }, 100);
+                    setTimeout(() => { window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)"; }, 4000);
                 } else {
-                    // Show Full Screen Desync
+                    playSynthSound('fail');
                     desyncScreen.classList.add('active-desync');
-                    
-                    // After 1.2 seconds, hide it and reset
                     setTimeout(() => {
                         desyncScreen.classList.remove('active-desync');
                         input.value = "";
-                        msg.innerHTML = "RE-ATTEMPT REQUIRED";
+                        msg.innerHTML = "CRITICAL ERROR: DESYNC";
                         msg.style.color = "#ff3333";
                         input.focus();
                     }, 1200);
@@ -161,6 +137,5 @@
             }
         });
     </script>
-
 </body>
 </html>
