@@ -8,91 +8,110 @@
             background-color: #e0e0e0; 
             color: #333; 
             font-family: "Segoe UI", Tahoma, sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; overflow: hidden;
         }
-        #animus-bg {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url('https://www.transparenttextures.com/patterns/cubes.png');
-            z-index: -1;
-            opacity: 0.5;
+        .glitch-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.3); z-index: 10; pointer-events: none; display: none;
         }
         #login-box {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-left: 5px solid #000;
-            box-shadow: 10px 10px 0px #ccc;
-            width: 450px;
-            text-align: left;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px; border-left: 5px solid #000;
+            box-shadow: 20px 20px 0px #bcbcbc; width: 450px; z-index: 5;
         }
-        h1 { font-weight: 300; letter-spacing: 5px; margin-bottom: 30px; border-bottom: 1px solid #ccc; }
+        h1 { font-weight: 300; letter-spacing: 8px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
         input {
-            width: 100%;
-            padding: 10px 0;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #000;
-            font-size: 16px;
-            outline: none;
-            text-transform: lowercase;
+            width: 100%; padding: 10px 0; background: transparent; border: none;
+            border-bottom: 2px solid #000; font-size: 16px; outline: none;
         }
-        .label { font-size: 10px; color: #888; letter-spacing: 2px; }
-        #message { margin-top: 20px; font-size: 12px; color: #d9534f; min-height: 20px; }
+        #message { margin-top: 20px; font-size: 12px; color: #d9534f; font-weight: bold; min-height: 20px;}
         .hidden { display: none; }
-        
-        /* Simple reveal animation */
-        #secretContent {
-            animation: fadeIn 2s;
-            text-align: center;
+        .btn-access {
+            display:inline-block; margin-top:20px; padding:15px 30px; 
+            background:#000; color:#fff; text-decoration:none; 
+            font-weight: bold; letter-spacing: 2px; cursor: pointer; border: none;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn-access:hover { background: #333; }
     </style>
 </head>
 <body>
 
-<div id="animus-bg"></div>
+<div class="glitch-overlay" id="glitch"></div>
+
+<audio id="ambientLoop" loop>
+    <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/pause.wav" type="audio/wav">
+</audio>
+<audio id="deniedSound">
+    <source src="https://freesound.org/data/previews/415/415764_6090639-lq.mp3" type="audio/mp3">
+</audio>
+<audio id="grantedSound">
+    <source src="https://freesound.org/data/previews/263/263129_4232300-lq.mp3" type="audio/mp3">
+</audio>
+<audio id="bladeSound">
+    <source src="https://freesound.org/data/previews/568/568169_12723321-lq.mp3" type="audio/mp3">
+</audio>
 
 <div id="login-box">
-    <h1>ANIMUS <small style="font-size: 12px;">v1.0.2</small></h1>
+    <h1>ANIMUS</h1>
     <div id="entry-ui">
-        <div class="label">IDENTITY VERIFICATION REQUIRED</div>
-        <p style="font-size: 14px; color: #555;">Enter the Maxim of the Creed to synchronize:</p>
-        <input type="text" id="passwordField" placeholder="type here..." autofocus autocomplete="off">
+        <p style="font-size: 10px; color: #888; letter-spacing: 2px;">ENCRYPTION LAYER: 0.1.2</p>
+        <p style="font-size: 14px; color: #555;">Speak the words of the Creed to synchronize:</p>
+        <input type="text" id="passwordField" placeholder="Enter Maxim..." autofocus autocomplete="off">
         <div id="message"></div>
+        <p style="font-size: 9px; color: #aaa; margin-top: 30px;">[ CLICK ANYWHERE TO INITIALIZE AUDIO ]</p>
     </div>
 
-    <div id="secretContent" class="hidden">
-        <h2 style="color: #000; letter-spacing: 2px;">SYNCHRONIZATION COMPLETE</h2>
-        <p>Welcome, Brother. The community awaits.</p>
-        <hr>
-        <p><a href="https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)" style="color: #888; text-decoration: none; font-weight: bold;">[ ENTER PRIVATE FORUM ]</a></p>
+    <div id="secretContent" class="hidden" style="text-align: center;">
+        <h2 style="letter-spacing: 2px;">SYNCHRONIZED</h2>
+        <p style="font-style: italic; color: #666;">"Nothing is true, everything is permitted."</p>
+        <button class="btn-access" id="finalButton">LEAP OF FAITH</button>
     </div>
 </div>
 
 <script>
     const input = document.getElementById('passwordField');
     const msg = document.getElementById('message');
-    // The exact secret word you requested
-    const secretWord = "nothing is true every thing is permitted";
+    const glitch = document.getElementById('glitch');
+    const ambient = document.getElementById('ambientLoop');
+    const denied = document.getElementById('deniedSound');
+    const granted = document.getElementById('grantedSound');
+    const blade = document.getElementById('bladeSound');
+    const finalBtn = document.getElementById('finalButton');
+    
+    const secretWord = "nothing is true everything is permitted";
+
+    // Start ambient sound on click
+    document.body.addEventListener('click', () => { ambient.play(); }, {once: true});
+
+    function triggerGlitch() {
+        glitch.style.display = 'block';
+        setTimeout(() => { glitch.style.display = 'none'; }, 150);
+    }
 
     input.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
-            // Check for match (ignoring extra spaces or caps)
             if (input.value.trim().toLowerCase() === secretWord) {
+                granted.play();
+                triggerGlitch();
                 document.getElementById('entry-ui').classList.add('hidden');
                 document.getElementById('secretContent').classList.remove('hidden');
-                msg.innerText = "";
             } else {
-                msg.innerText = "DESYNCHRONIZATION DETECTED. TRY AGAIN.";
+                denied.play();
+                triggerGlitch();
+                msg.innerText = "DESYNCHRONIZATION DETECTED";
                 input.value = "";
+                setTimeout(() => { msg.innerText = ""; }, 2000);
             }
         }
+    });
+
+    finalBtn.addEventListener('click', function() {
+        blade.play();
+        triggerGlitch();
+        setTimeout(() => {
+            window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)
+        }, 800); // Small delay so they hear the blade before leaving
     });
 </script>
 
