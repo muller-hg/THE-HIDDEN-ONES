@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNA SEQUENCE VERIFICATION</title>
+    <title>DNA SEQUENCE VERIFICATION | THE HIDDEN ONES</title>
     <style>
         body, html {
             background-color: #050505;
@@ -17,7 +17,7 @@
             overflow: hidden;
         }
 
-        /* Full-screen Desync Overlay */
+        /* --- Full-screen Desync Overlay --- */
         #desync-screen {
             position: fixed;
             top: 0;
@@ -26,15 +26,25 @@
             height: 100%;
             background-color: rgba(139, 0, 0, 0.95);
             color: white;
-            display: none;
+            display: none; /* Hidden by default */
             justify-content: center;
             align-items: center;
-            font-size: clamp(2rem, 10vw, 5rem);
+            font-size: clamp(2rem, 8vw, 5rem);
             font-weight: 900;
             letter-spacing: 15px;
             z-index: 9999;
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(0,0,0,0.7);
+            text-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        /* Animation for the Desync Glitch */
+        @keyframes glitcheffect {
+            0% { transform: skew(3deg); opacity: 1; }
+            20% { transform: skew(-3deg); opacity: 0.7; }
+            40% { transform: skew(6deg); }
+            60% { transform: skew(-2deg); opacity: 1; }
+            80% { transform: skew(5deg); }
+            100% { transform: skew(0deg); }
         }
 
         .active-desync {
@@ -42,15 +52,7 @@
             animation: glitcheffect 0.1s infinite;
         }
 
-        @keyframes glitcheffect {
-            0% { transform: skew(2deg); opacity: 1; }
-            20% { transform: skew(-3deg); opacity: 0.8; }
-            40% { transform: skew(5deg); }
-            60% { transform: skew(-1deg); opacity: 1; }
-            80% { transform: skew(4deg); }
-            100% { transform: skew(0deg); }
-        }
-
+        /* --- Main Portal Box --- */
         .portal-box {
             position: relative;
             text-align: center;
@@ -59,14 +61,16 @@
             border: 1px solid #222;
             width: 450px;
             z-index: 10;
+            transition: all 0.3s ease;
         }
 
+        /* The Assassin Insignia */
         .insignia {
             width: 80px; height: 110px;
             margin: 0 auto 40px;
             background-color: #fff;
             clip-path: polygon(50% 0%, 100% 100%, 85% 100%, 50% 35%, 15% 100%, 0% 100%);
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
 
         h1 {
@@ -77,6 +81,7 @@
             text-transform: uppercase;
         }
 
+        /* --- Input Styling --- */
         input {
             background: transparent;
             border: none;
@@ -85,64 +90,77 @@
             width: 100%;
             padding: 10px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             outline: none;
             transition: all 0.3s;
             text-transform: lowercase;
         }
 
-        input:focus { border-color: #fff; }
+        input:focus { 
+            border-color: #fff; 
+            letter-spacing: 1px;
+        }
 
         .status-text {
             margin-top: 20px;
             font-size: 0.7rem;
             color: #444;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
+
     </style>
 </head>
 <body>
 
-<div id="desync-screen">DESYNCHRONIZED</div>
+    <div id="desync-screen">DESYNCHRONIZED</div>
 
-<div class="portal-box" id="main-box">
-    <div class="insignia"></div>
-    <h1>Genetic Memory Locked</h1>
-    
-    <input type="text" id="passInput" placeholder="Enter Credentials..." autocomplete="off">
-    
-    <div id="msg" class="status-text">WAITING FOR INPUT...</div>
-</div>
+    <div class="portal-box" id="main-box">
+        <div class="insignia"></div>
+        <h1>Genetic Memory Locked</h1>
+        
+        <input type="text" id="passInput" placeholder="Enter Credentials..." autocomplete="off">
+        
+        <div id="msg" class="status-text">SYSTEM STANDBY...</div>
+    </div>
 
-<script>
-    const input = document.getElementById('passInput');
-    const desyncScreen = document.getElementById('desync-screen');
-    const msg = document.getElementById('msg');
+    <script>
+        const input = document.getElementById('passInput');
+        const desyncScreen = document.getElementById('desync-screen');
+        const msg = document.getElementById('msg');
+        const box = document.getElementById('main-box');
 
-    input.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            const val = input.value.toLowerCase().trim();
-            
-            // The Secret Phrase
-            if (val === "nothing is true everything is permitted") {
-                msg.innerHTML = "ACCESS GRANTED. REDIRECTING...";
-                msg.style.color = "#00ffcc";
-                setTimeout(() => {
-                    window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)";
-                }, 1500);
-            } else {
-                // Full Screen Failure
-                desyncScreen.classList.add('active-desync');
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const val = input.value.toLowerCase().trim();
                 
-                setTimeout(() => {
-                    desyncScreen.classList.remove('active-desync');
-                    input.value = "";
-                    input.focus();
-                }, 1200);
+                // --- SUCCESS PATH ---
+                if (val === "nothing is true everything is permitted") {
+                    msg.innerHTML = "ACCESS GRANTED. SYNCHRONIZING...";
+                    msg.style.color = "#00ffcc";
+                    input.style.borderColor = "#00ffcc";
+                    
+                    setTimeout(() => {
+                        window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)";
+                    }, 1500);
+
+                // --- FAILURE PATH ---
+                } else {
+                    // Show Full Screen Desync
+                    desyncScreen.classList.add('active-desync');
+                    
+                    // After 1.2 seconds, hide it and reset
+                    setTimeout(() => {
+                        desyncScreen.classList.remove('active-desync');
+                        input.value = "";
+                        msg.innerHTML = "RE-ATTEMPT REQUIRED";
+                        msg.style.color = "#ff3333";
+                        input.focus();
+                    }, 1200);
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 </html>
