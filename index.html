@@ -14,21 +14,31 @@
             animation: backgroundPulse 12s infinite alternate;
         }
         @keyframes backgroundPulse { 0% { background-color: #050505; } 100% { background-color: #0b1116; } }
-        .overlay-effect {
+        
+        /* FULL SCREEN OVERLAYS */
+        #desync-screen, #sync-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 5; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
-        #desync-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(150, 0, 0, 0.98); color: white;
             display: none; justify-content: center; align-items: center;
-            font-size: clamp(2rem, 8vw, 5rem); font-weight: 900;
-            letter-spacing: 15px; z-index: 9999; text-transform: uppercase;
+            font-weight: 900; z-index: 9999; text-transform: uppercase;
+            text-align: center; padding: 20px; box-sizing: border-box;
         }
-        .active-desync { display: flex !important; animation: glitcheffect 0.1s infinite; }
-        @keyframes glitcheffect { 0% { transform: translate(3px, 1px); } 50% { transform: translate(-3px, -1px); filter: blur(2px); } 100% { transform: translate(0); } }
+
+        /* FAIL SCREEN (RED) */
+        #desync-screen { background-color: rgba(150, 0, 0, 0.98); color: white; font-size: clamp(2rem, 8vw, 5rem); letter-spacing: 15px; }
+        
+        /* SUCCESS SCREEN (ANIMUS BLUE/GREEN) */
+        #sync-screen { 
+            background-color: rgba(0, 40, 45, 0.98); 
+            color: #00ffcc; 
+            font-size: clamp(1.5rem, 5vw, 3.5rem); 
+            letter-spacing: 8px;
+            line-height: 1.2;
+        }
+
+        .active-overlay { display: flex !important; animation: glitcheffect 0.1s infinite; }
+        @keyframes glitcheffect { 0% { transform: translate(2px, 1px); } 50% { transform: translate(-2px, -1px); filter: blur(1px); } 100% { transform: translate(0); } }
+
+        /* PORTAL UI */
         .portal-box {
             position: relative; text-align: center; padding: 50px;
             background: rgba(10, 10, 10, 0.85); border: 1px solid #333;
@@ -41,43 +51,51 @@
             animation: pulse-glow 4s infinite ease-in-out;
         }
         @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); transform: scale(1); } 50% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); transform: scale(1.03); } }
-        h1 { font-size: 0.8rem; letter-spacing: 5px; color: #888; margin-bottom: 30px; text-transform: uppercase; }
+        
         input {
             background: #111; border: none; border-bottom: 2px solid #444;
             color: #fff; width: 100%; padding: 12px; text-align: center;
             font-size: 1rem; outline: none; transition: 0.3s;
         }
-        #loading-container { width: 100%; height: 4px; background: #222; margin-top: 30px; display: none; overflow: hidden; }
-        #loading-bar { width: 0%; height: 100%; background: #00ffcc; box-shadow: 0 0 15px #00ffcc; transition: width 3.5s linear; }
-        .status-text { margin-top: 20px; font-size: 0.7rem; color: #555; letter-spacing: 2px; }
+        
+        #youtube-player { position: absolute; top: -9999px; left: -9999px; visibility: hidden; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body onclick="playMusic()">
 
-    <div class="overlay-effect"></div>
     <div id="desync-screen">DESYNCHRONIZED</div>
+    
+    <div id="sync-screen">
+        SYNCHRONIZING:<br>THE TRUTH OF THE FIRST CIVILIZATION
+    </div>
+
+    <iframe id="youtube-player" width="100" height="100" 
+        src="https://www.youtube.com/embed/FSVHx23ByhM?enablejsapi=1&loop=1&playlist=FSVHx23ByhM" 
+        frameborder="0" allow="autoplay">
+    </iframe>
 
     <div class="portal-box">
         <div class="insignia"></div>
-        <h1>Genetic Memory Locked</h1>
-        <input type="text" id="passInput" placeholder="Click to Initialize Animus..." autocomplete="off">
-        <div id="loading-container"><div id="loading-bar"></div></div>
-        <div id="msg" class="status-text">SYSTEM STANDBY...</div>
+        <h1 style="font-size: 0.8rem; letter-spacing: 5px; color: #888; margin-bottom: 30px; text-transform: uppercase;">Genetic Memory Locked</h1>
+        <input type="text" id="passInput" placeholder="[ CLICK TO INITIALIZE ]" autocomplete="off">
+        <div id="msg" style="margin-top: 20px; font-size: 0.7rem; color: #555; letter-spacing: 2px;">SYSTEM STANDBY...</div>
     </div>
 
     <script>
         const input = document.getElementById('passInput');
         const desyncScreen = document.getElementById('desync-screen');
+        const syncScreen = document.getElementById('sync-screen');
         const msg = document.getElementById('msg');
-        const loadingContainer = document.getElementById('loading-container');
-        const loadingBar = document.getElementById('loading-bar');
-
-        // Audio Context (Synthesized sound)
+        
         let audioCtx = null;
+        let musicStarted = false;
 
-        function initAudio() {
-            if (!audioCtx) {
+        function playMusic() {
+            if (!musicStarted) {
+                const player = document.getElementById('youtube-player');
+                player.src += "&autoplay=1";
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                musicStarted = true;
                 input.placeholder = "Enter Credentials...";
             }
         }
@@ -86,51 +104,36 @@
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
+            osc.connect(gain); gain.connect(audioCtx.destination);
             if (type === 'success') {
-                // High Tech Chime
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.8);
             } else {
-                // Low Glitch Buzz
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(110, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(55, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(110, audioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
             }
         }
 
         input.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                initAudio(); // Backup init
                 const val = input.value.toLowerCase().trim();
-                
                 if (val === "nothing is true everything is permitted") {
                     playSynthSound('success');
-                    input.style.display = "none";
-                    msg.innerHTML = "SYNCHRONIZING SEQUENCE...";
-                    msg.style.color = "#00ffcc";
-                    loadingContainer.style.display = "block";
-                    setTimeout(() => { loadingBar.style.width = "100%"; }, 100);
-                    setTimeout(() => { window.location.href = "https://assassinscreed.fandom.com/wiki/Assassin%27s_Creed_(series)"; }, 4000);
+                    
+                    // Show Huge Success Screen
+                    syncScreen.classList.add('active-overlay');
+                    
+                    setTimeout(() => { 
+                        window.location.href = "https://assassinscreed.fandom.com/wiki/The_Truth"; 
+                    }, 5000);
                 } else {
                     playSynthSound('fail');
-                    desyncScreen.classList.add('active-desync');
+                    desyncScreen.classList.add('active-overlay');
                     setTimeout(() => {
-                        desyncScreen.classList.remove('active-desync');
+                        desyncScreen.classList.remove('active-overlay');
                         input.value = "";
-                        msg.innerHTML = "CRITICAL ERROR: DESYNC";
-                        msg.style.color = "#ff3333";
                         input.focus();
                     }, 1200);
                 }
