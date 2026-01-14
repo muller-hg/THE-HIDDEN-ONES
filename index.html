@@ -4,141 +4,158 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANIMUS TERMINAL | THE HIDDEN ONES</title>
-    <link rel="icon" type="image/x-icon" href="https://www.google.com/s2/favicons?domain=assassinscreed.fandom.com">
     <style>
         body, html {
-            background-color: #050505; color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #020507; color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
             height: 100%; margin: 0; display: flex;
             justify-content: center; align-items: center; overflow: hidden;
-            animation: backgroundPulse 12s infinite alternate;
         }
-        @keyframes backgroundPulse { 0% { background-color: #050505; } 100% { background-color: #0b1116; } }
-        
-        /* FULL SCREEN OVERLAYS */
-        #desync-screen, #sync-screen {
+
+        .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; justify-content: center; align-items: center;
-            font-weight: 900; z-index: 9999; text-transform: uppercase;
-            text-align: center; padding: 20px; box-sizing: border-box;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px; z-index: 2000; pointer-events: none;
         }
 
-        /* FAIL SCREEN (RED) */
-        #desync-screen { background-color: rgba(150, 0, 0, 0.98); color: white; font-size: clamp(2rem, 8vw, 5rem); letter-spacing: 15px; }
-        
-        /* SUCCESS SCREEN (ANIMUS BLUE/GREEN) */
-        #sync-screen { 
-            background-color: rgba(0, 40, 45, 0.98); 
-            color: #00ffcc; 
-            font-size: clamp(1.5rem, 5vw, 3.5rem); 
-            letter-spacing: 8px;
-            line-height: 1.2;
+        /* OVERLAYS */
+        #fail-overlay, #sync-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9000; text-transform: uppercase; font-weight: bold;
+        }
+        #fail-overlay { background: rgba(150, 0, 0, 0.95); color: white; font-size: 3rem; letter-spacing: 10px; }
+        #sync-overlay { background: #000; color: #00ffcc; font-size: 1.2rem; letter-spacing: 4px; text-align: center; line-height: 2; }
+
+        .glitch-text { animation: textGlitch 0.1s infinite; }
+        @keyframes textGlitch {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -1px); opacity: 0.8; }
+            100% { transform: translate(0); }
         }
 
-        .active-overlay { display: flex !important; animation: glitcheffect 0.1s infinite; }
-        @keyframes glitcheffect { 0% { transform: translate(2px, 1px); } 50% { transform: translate(-2px, -1px); filter: blur(1px); } 100% { transform: translate(0); } }
+        #video-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: none; z-index: 5000;
+        }
+        video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* PORTAL UI */
         .portal-box {
             position: relative; text-align: center; padding: 50px;
-            background: rgba(10, 10, 10, 0.85); border: 1px solid #333;
-            width: 400px; z-index: 50; box-shadow: 0 0 30px rgba(0,0,0,1);
-            backdrop-filter: blur(8px);
+            background: rgba(5, 10, 15, 0.95); border: 1px solid #1a3a3a;
+            width: 380px; z-index: 100; backdrop-filter: blur(10px);
         }
+
         .insignia {
-            width: 80px; height: 110px; margin: 0 auto 30px;
-            background-color: #ffffff; clip-path: polygon(50% 0%, 100% 100%, 85% 100%, 50% 35%, 15% 100%, 0% 100%);
-            animation: pulse-glow 4s infinite ease-in-out;
+            width: 70px; height: 90px; margin: 0 auto 30px;
+            background-color: #00ffcc; 
+            clip-path: polygon(50% 0%, 100% 100%, 85% 100%, 50% 35%, 15% 100%, 0% 100%);
+            animation: flicker 3s infinite;
         }
-        @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); transform: scale(1); } 50% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); transform: scale(1.03); } }
-        
-        input {
-            background: #111; border: none; border-bottom: 2px solid #444;
-            color: #fff; width: 100%; padding: 12px; text-align: center;
-            font-size: 1rem; outline: none; transition: 0.3s;
+        @keyframes flicker { 0%, 90%, 100% { opacity: 1; } 92%, 95% { opacity: 0.4; } }
+
+        input, #init-btn, #memory-btn {
+            width: 100%; padding: 15px; margin-top: 20px;
+            font-family: inherit; text-transform: uppercase; letter-spacing: 2px;
+            outline: none; border: 1px solid #1a3a3a; box-sizing: border-box;
         }
-        
-        #youtube-player { position: absolute; top: -9999px; left: -9999px; visibility: hidden; }
+
+        input { background: #000; color: #00ffcc; display: none; }
+        #init-btn { background: #00ffcc; color: #000; cursor: pointer; font-weight: bold; }
+        #memory-btn { background: transparent; border: 2px solid #00ffcc; color: #00ffcc; cursor: pointer; display: none; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
-<body onclick="playMusic()">
+<body>
 
-    <div id="desync-screen">DESYNCHRONIZED</div>
+    <div class="scanlines"></div>
     
-    <div id="sync-screen">
-        SYNCHRONIZING:<br>THE TRUTH OF THE FIRST CIVILIZATION
+    <div id="fail-overlay">DESYNCHRONIZED</div>
+    
+    <div id="sync-overlay">
+        <div class="glitch-text">> ACCESSING MEMORY DATA...</div>
+        <div style="font-size: 2rem; color: #fff; margin-top: 10px;">THE TRUTH</div>
     </div>
 
-    <iframe id="youtube-player" width="100" height="100" 
-        src="https://www.youtube.com/embed/FSVHx23ByhM?enablejsapi=1&loop=1&playlist=FSVHx23ByhM" 
-        frameborder="0" allow="autoplay">
-    </iframe>
+    <div id="video-layer">
+        <video id="memory-video" playsinline>
+            <source src="videoplayback.mp4" type="video/mp4">
+        </video>
+    </div>
 
-    <div class="portal-box">
+    <div class="portal-box" id="terminal-ui">
         <div class="insignia"></div>
-        <h1 style="font-size: 0.8rem; letter-spacing: 5px; color: #888; margin-bottom: 30px; text-transform: uppercase;">Genetic Memory Locked</h1>
-        <input type="text" id="passInput" placeholder="[ CLICK TO INITIALIZE ]" autocomplete="off">
-        <div id="msg" style="margin-top: 20px; font-size: 0.7rem; color: #555; letter-spacing: 2px;">SYSTEM STANDBY...</div>
+        <div id="status-text" style="font-size: 0.7rem; color: #3a5a5a;">// SYSTEM_IDLE</div>
+        
+        <button id="init-btn" onclick="initialize()">INITIALIZE ANIMUS</button>
+        <input type="text" id="passInput" placeholder="[ ENTER KEY ]" autocomplete="off">
+        <button id="memory-btn" onclick="engageMemory()">[ ACCESS MEMORY CORE ]</button>
     </div>
 
     <script>
+        const video = document.getElementById('memory-video');
         const input = document.getElementById('passInput');
-        const desyncScreen = document.getElementById('desync-screen');
-        const syncScreen = document.getElementById('sync-screen');
-        const msg = document.getElementById('msg');
+        const initBtn = document.getElementById('init-btn');
+        const memBtn = document.getElementById('memory-btn');
+        const status = document.getElementById('status-text');
         
-        let audioCtx = null;
-        let musicStarted = false;
+        let audioCtx;
 
-        function playMusic() {
-            if (!musicStarted) {
-                const player = document.getElementById('youtube-player');
-                player.src += "&autoplay=1";
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                musicStarted = true;
-                input.placeholder = "Enter Credentials...";
-            }
+        function initialize() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            initBtn.style.display = "none";
+            input.style.display = "block";
+            input.focus();
+            status.innerText = "// RECONSTRUCTING_STREAM";
+            video.load(); 
         }
 
-        function playSynthSound(type) {
+        function playSound(freq, type) {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            if (type === 'success') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.8);
-            } else {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(110, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-            }
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
         }
 
-        input.addEventListener('keypress', function (e) {
+        input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 const val = input.value.toLowerCase().trim();
                 if (val === "nothing is true everything is permitted") {
-                    playSynthSound('success');
-                    
-                    // Show Huge Success Screen
-                    syncScreen.classList.add('active-overlay');
-                    
-                    setTimeout(() => { 
-                        window.location.href = "https://assassinscreed.fandom.com/wiki/The_Truth"; 
-                    }, 5000);
+                    playSound(880, 'sine');
+                    input.style.display = "none";
+                    memBtn.style.display = "block";
+                    status.innerText = "// ACCESS_GRANTED";
                 } else {
-                    playSynthSound('fail');
-                    desyncScreen.classList.add('active-overlay');
+                    playSound(110, 'sawtooth');
+                    document.getElementById('fail-overlay').style.display = "flex";
                     setTimeout(() => {
-                        desyncScreen.classList.remove('active-overlay');
+                        document.getElementById('fail-overlay').style.display = "none";
                         input.value = "";
-                        input.focus();
-                    }, 1200);
+                    }, 1500);
                 }
             }
         });
+
+        function engageMemory() {
+            document.getElementById('sync-overlay').style.display = "flex";
+            
+            setTimeout(() => {
+                document.getElementById('sync-overlay').style.display = "none";
+                document.getElementById('terminal-ui').style.display = "none";
+                document.getElementById('video-layer').style.display = "block";
+                video.play();
+            }, 3500); // 3.5 seconds to read the screen
+        }
+
+        video.onended = () => {
+            window.location.href = "https://assassinscreed.fandom.com/wiki/The_Truth";
+        };
     </script>
 </body>
 </html>
